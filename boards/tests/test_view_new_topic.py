@@ -14,12 +14,12 @@ class NewTopicTests(TestCase):
         self.client.login(username='john', password='123')
 
     def test_new_topic_view_success_status_code(self):
-        url = reverse('create_new_topic', kwargs={'pk': 1})
+        url = reverse('create_new_topic', kwargs={'board_id': 1})
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
 
     def test_new_topic_view_not_found_status_code(self):
-        url = reverse('create_new_topic', kwargs={'pk': 99})
+        url = reverse('create_new_topic', kwargs={'board_id': 99})
         response = self.client.get(url)
         self.assertEquals(response.status_code, 404)
 
@@ -28,24 +28,24 @@ class NewTopicTests(TestCase):
         self.assertEquals(view.func, create_new_topic)
 
     def test_new_topic_view_contains_link_back_to_board_topics_view(self):
-        new_topic_url = reverse('create_new_topic', kwargs={'pk': 1})
-        board_topics_url = reverse('board_topics', kwargs={'pk': 1})
+        new_topic_url = reverse('create_new_topic', kwargs={'board_id': 1})
+        board_topics_url = reverse('board_topics', kwargs={'board_id': 1})
         response = self.client.get(new_topic_url)
         self.assertContains(response, 'href="{0}"'.format(board_topics_url))
 
     def test_csrf(self):
-        url = reverse('create_new_topic', kwargs={'pk': 1})
+        url = reverse('create_new_topic', kwargs={'board_id': 1})
         response = self.client.get(url)
         self.assertContains(response, 'csrfmiddlewaretoken')
 
     def test_contains_form(self):
-        url = reverse('create_new_topic', kwargs={'pk': 1})
+        url = reverse('create_new_topic', kwargs={'board_id': 1})
         response = self.client.get(url)
         form = response.context.get('form')
         self.assertIsInstance(form, CreateNewTopicForm)
 
     def test_new_topic_valid_post_data(self):
-        url = reverse('create_new_topic', kwargs={'pk': 1})
+        url = reverse('create_new_topic', kwargs={'board_id': 1})
         data = {
             'subject': 'Test title',
             'message': 'Lorem ipsum dolor sit amet'
@@ -55,22 +55,22 @@ class NewTopicTests(TestCase):
         self.assertTrue(Post.objects.exists())
 
     def test_new_topic_invalid_post_data(self):
-        '''
+        """
         Invalid post data should not redirect
         The expected behavior is to show the form again with validation errors
-        '''
-        url = reverse('create_new_topic', kwargs={'pk': 1})
+        """
+        url = reverse('create_new_topic', kwargs={'board_id': 1})
         response = self.client.post(url, {})
         form = response.context.get('form')
         self.assertEquals(response.status_code, 200)
         self.assertTrue(form.errors)
 
     def test_new_topic_invalid_post_data_empty_fields(self):
-        '''
+        """
         Invalid post data should not redirect
         The expected behavior is to show the form again with validation errors
-        '''
-        url = reverse('create_new_topic', kwargs={'pk': 1})
+        """
+        url = reverse('create_new_topic', kwargs={'board_id': 1})
         data = {
             'subject': '',
             'message': ''
@@ -84,7 +84,7 @@ class NewTopicTests(TestCase):
 class LoginRequiredNewTopicTests(TestCase):
     def setUp(self):
         Board.objects.create(name='Django', description='Django board.')
-        self.url = reverse('create_new_topic', kwargs={'pk': 1})
+        self.url = reverse('create_new_topic', kwargs={'board_id': 1})
         self.response = self.client.get(self.url)
 
     def test_redirection(self):
