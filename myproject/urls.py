@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^settings/password/done/$',
         auth_views.PasswordChangeDoneView.as_view(template_name='password_change_done.html'),
         name='password_change_done'),
+    url(r'^settings/account/$', accounts_views.UserUpdateView.as_view(), name='my_account'),
     url(r'^boards/(?P<board_id>\d+)/$', views.TopicsListView.as_view(), name='board_topics'),
     url(r'^boards/(?P<board_id>\d+)/new/$', views.create_new_topic, name='create_new_topic'),
     url(r'^boards/(?P<board_id>\d+)/topics/(?P<topic_pk>\d+)/$', views.PostsListView.as_view(), name='topic_posts'),
