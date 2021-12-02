@@ -14,6 +14,15 @@ class Board(models.Model):
     def __str__(self):
         return self.name
 
+    def get_posts_count(self):
+        return Post.objects.filter(topic__board=self).count()
+
+    def get_topics_count(self):
+        return Topic.objects.filter(board=self).count()
+
+    def get_lat_post(self):
+        return Post.objects.filter(topic__board=self).order_by('-created_at').first()
+
 
 class Topic(models.Model):
     subject = models.CharField(max_length=250)
