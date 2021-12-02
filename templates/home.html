@@ -8,14 +8,14 @@
     <table class="table">
         <thead class="thead-inverse">
         <tr>
-            <th>Board (Inactive Boards - {{ inactive_boards_count }})</th>
+            <th>Board</th>
             <th>Posts</th>
             <th>Topics</th>
             <th>Last Post</th>
         </tr>
         </thead>
         <tbody>
-        {% for board in active_boards %}
+        {% for board in boards %}
             <tr>
                 <td>
                     <a href="{% url 'board_topics' board.pk %}">{{ board.name }}</a>

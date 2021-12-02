@@ -3,7 +3,7 @@ from django.db.models import Count
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-from django.views.generic import UpdateView
+from django.views.generic import UpdateView, ListView
 
 from .forms import CreateNewTopicForm, PostForm
 from .models import Board, Post, Topic
@@ -11,18 +11,68 @@ from .models import Board, Post, Topic
 
 # Create your views here.
 
-def home(request):
-    active_boards = Board.objects.filter(is_active=True)
-    inactive_boards = Board.objects.filter(is_active=False)
-    inactive_boards_count = len(inactive_boards)
-    return render(request, 'home.html', {'active_boards': active_boards, 'inactive_boards': inactive_boards,
-                                         'inactive_boards_count': inactive_boards_count})
+class BoardListView(ListView):
+    model = Board
+    context_object_name = 'boards'
+    template_name = 'home.html'
 
 
-def board_topics(request, board_id):
-    board = get_object_or_404(Board, pk=board_id)
-    topics = board.topics.order_by('-updated_at').annotate(replies=Count('posts') - 1)
-    return render(request, 'topics.html', {'board': board, 'topics': topics})
+class TopicsListView(ListView):
+    model = Topic
+    context_object_name = 'topics'
+    template_name = 'topics.html'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        kwargs['board'] = self.board
+        return super().get_context_data(**kwargs)
+
+    def get_queryset(self):
+        self.board = get_object_or_404(Board, pk=self.kwargs.get('board_id'))
+        query_set = self.board.topics.order_by('-updated_at').annotate(replies=Count('posts') - 1)
+        return query_set
+
+
+# def board_topics(request, board_id):
+#     board = get_object_or_404(Board, pk=board_id)
+#     query_set = board.topics.order_by('-updated_at').annotate(replies=Count('posts') - 1)
+#
+#     page = request.GET.get('page', 1)
+#
+#     paginator = Paginator(query_set, 10)
+#
+#     try:
+#         topics = paginator.page(page)
+#     except PageNotAnInteger:
+#         topics = paginator.page(1)
+#     except EmptyPage:
+#         topics = paginator.page(paginator.num_pages)
+#
+#     return render(request, 'topics.html', {'board': board, 'topics': topics})
+
+class PostsListView(ListView):
+    model = Post
+    context_object_name = 'posts'
+    template_name = 'topic_posts.html'
+    paginate_by = 2
+
+    def get_context_data(self, **kwargs):
+        self.topic.views += 1
+        self.topic.save()
+        kwargs['topic'] = self.topic
+        return super().get_context_data(**kwargs)
+
+    def get_queryset(self):
+        self.topic = get_object_or_404(Topic, board__pk=self.kwargs.get('board_id'), pk=self.kwargs.get('topic_pk'))
+        query_set = self.topic.posts.order_by('created_at')
+        return query_set
+
+
+# def topic_posts(request, board_id, topic_pk):
+#     topic = get_object_or_404(Topic, board__pk=board_id, pk=topic_pk)
+#     topic.views += 1
+#     topic.save()
+#     return render(request, 'topic_posts.html', {'topic': topic})
 
 
 @login_required
@@ -47,13 +97,6 @@ def create_new_topic(request, board_id):
         form = CreateNewTopicForm()
 
     return render(request, 'new_topic.html', {'board': board, 'form': form})
-
-
-def topic_posts(request, board_id, topic_pk):
-    topic = get_object_or_404(Topic, board__pk=board_id, pk=topic_pk)
-    topic.views += 1
-    topic.save()
-    return render(request, 'topic_posts.html', {'topic': topic})
 
 
 @login_required

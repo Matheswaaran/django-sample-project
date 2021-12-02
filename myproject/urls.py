@@ -21,7 +21,7 @@ from accounts import views as accounts_views
 from boards import views
 
 urlpatterns = [
-    url(r'^$', views.home, name='home'),
+    url(r'^$', views.BoardListView.as_view(), name='home'),
     url(r'^signup/$', accounts_views.signup, name='signup'),
     url(r'^login/$', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
     url(r'^reset/$',
@@ -46,9 +46,9 @@ urlpatterns = [
     url(r'^settings/password/done/$',
         auth_views.PasswordChangeDoneView.as_view(template_name='password_change_done.html'),
         name='password_change_done'),
-    url(r'^boards/(?P<board_id>\d+)/$', views.board_topics, name='board_topics'),
+    url(r'^boards/(?P<board_id>\d+)/$', views.TopicsListView.as_view(), name='board_topics'),
     url(r'^boards/(?P<board_id>\d+)/new/$', views.create_new_topic, name='create_new_topic'),
-    url(r'^boards/(?P<board_id>\d+)/topics/(?P<topic_pk>\d+)/$', views.topic_posts, name='topic_posts'),
+    url(r'^boards/(?P<board_id>\d+)/topics/(?P<topic_pk>\d+)/$', views.PostsListView.as_view(), name='topic_posts'),
     url(r'^boards/(?P<board_id>\d+)/topics/(?P<topic_pk>\d+)/reply/$', views.reply_topic, name='reply_topic'),
     url(r'^boards/(?P<board_id>\d+)/topics/(?P<topic_pk>\d+)/posts/(?P<post_pk>\d+)/edit/$',
         views.PostUpdateView.as_view(),
