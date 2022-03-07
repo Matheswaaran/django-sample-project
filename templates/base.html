@@ -5,6 +5,7 @@
     <title>{% block title %}Django Boards{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css?family=Peralta" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/tailwind-output.css' %}">
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     {% block stylesheet %}{% endblock %}
 </head>
@@ -22,11 +23,25 @@
                 {% if user.is_authenticated %}
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDarkDropdownMenuLink" role="button"
+                            <a class="flex items-center justify-end nav-link dropdown-toggle" href="#"
+                               id="navbarDarkDropdownMenuLink" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false">
+                                {% if user.profile.photo %}
+                                    <img
+                                            src="{{ user.profile.photo.url }}"
+                                            alt="{{ user.username }}"
+                                            class="h-8 w-8 mr-4 rounded"
+                                    />
+                                {% else %}
+                                    <img
+                                            src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
+                                            alt="{{ user.username }}"
+                                            class="h-8 w-8 mr-4 rounded"
+                                    />
+                                {% endif %}
                                 {{ user.username }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
+                            <ul class=" dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
                                 <a class="dropdown-item" href="{% url 'my_account' %}">My account</a>
                                 <a class="dropdown-item" href="{% url 'password_change' %}">Change password</a>
                                 <div class="dropdown-divider"></div>
@@ -49,6 +64,20 @@
             {% block breadcrumb %}
             {% endblock %}
         </ol>
+
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                    <div class="alert alert-danger">
+                        {{ message|safe }}
+                    </div>
+                {% else %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message|safe }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
         {% block content %}
         {% endblock %}
     </div>
